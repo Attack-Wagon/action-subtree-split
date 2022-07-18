@@ -1,17 +1,15 @@
-name: 'Unity Package Publish'
-description: 'Publish unity package using package.json'
+name: 'git Subtree Split'
+description: 'use the git subtree split command as part of your build process'
 inputs:
-  name:  # name of the package
-    description: 'Package name i.e. com.mycompany.mypackage'
+  prefix:  # name of the package
+    description: 'Name of the folder to perform the subtree split on'
     required: true
-  upmBranch:
-    description: 'UPM branch to publish the package'
+  branch:
+    description: 'name of the branch to be created/updated for the subtree split'
     required: true
-    default: 'upm'
-  versionPostfix:
+  tag:
     description: 'Version postfix'
-    required: true
-    default: ''
+    required: false
 runs:
   using: 'node12'
   main: 'dist/index.js'
