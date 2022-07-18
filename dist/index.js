@@ -2973,40 +2973,28 @@ const fs = __nccwpck_require__(747);
 
 async function run() {
   try {
-    const packageName = core.getInput('name');
-    const upmBranch = core.getInput('upmBranch');
-    const versionPostfix = core.getInput('versionPostfix');
+    const prefix = core.getInput('prefix');
+    const branch = core.getInput('branch');
+    const tag = core.getInput('tag');
     const execOptions = {ignoreReturnCode:true};
 
-    const packageJsonBuffer = fs.readFileSync('Packages/' + packageName + '/package.json', {encoding:'utf8', flag:'r'});
-    const packageJson = JSON.parse(packageJsonBuffer.toString());
-    var packageVersion = packageJson.version;
-
-    if (!(packageVersion && packageVersion.length !== 0))
-      throw new Error('Package version is empty.');
-
-    if (versionPostfix && versionPostfix.length !== 0)
-      packageVersion = packageVersion + '-' + versionPostfix;
-
-    core.info('Check package version');
-    const isVersionExist = await exec.exec('git', ['ls-remote', '--exit-code', '--tags', 'origin', packageVersion], execOptions);
-    if (isVersionExist == 0)
-      throw new Error('Same version already exists: ' + packageVersion);
-
-    core.info('Commit changes to upm branch');
-    var returnValue = await exec.exec('git', ['subtree', 'split', '--prefix=Packages/' + packageName, '--branch', upmBranch], execOptions);
+    core.info('Commit changes to subtree branch');
+    var returnValue = await exec.exec('git', ['subtree', 'split', '--prefix=' + prefix, '--branch', branch], execOptions);
     if (returnValue != 0)
-      throw new Error('Commit changes to upm [' + upmBranch + '] branch failed: ' + string(returnValue));
+      throw new Error('Commit changes to upm [' + branch + '] branch failed: ' + string(returnValue));
+    
+    if (tag && tag.length !== 0)
+    {
+      core.info('Create version tag with: ' + tag);
+      returnValue = await exec.exec('git', ['tag', tag, branch], execOptions);
+      if (returnValue != 0)
+        throw new Error('Creating version tag [' + tag + '] failed: ' + string(returnValue));
+    }
 
-    core.info('Create version tag with: ' + packageVersion);
-    returnValue = await exec.exec('git', ['tag', packageVersion, upmBranch], execOptions);
+    core.info('Push subtree branch');
+    returnValue = await exec.exec('git', ['push', 'origin', branch, '--tags', '--force'], execOptions);
     if (returnValue != 0)
-      throw new Error('Creating version tag [' + packageVersion + '] failed: ' + string(returnValue));
-
-    core.info('Push version and upm branch');
-    returnValue = await exec.exec('git', ['push', 'origin', upmBranch, '--tags', '--force'], execOptions);
-    if (returnValue != 0)
-      throw new Error('Pushing version [' + packageVersion + '] and upm [' + upmBranch + '] branch failed: ' + string(returnValue));
+      throw new Error('Pushing [' + branch + '] branch failed: ' + string(returnValue));
   } catch (error) {
     core.setFailed(error.message);
   }
