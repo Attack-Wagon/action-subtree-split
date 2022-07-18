@@ -1,7 +1,6 @@
-# Unity Package Publish
+# Git Subtree Split
 
-Publishes Unity package using Packages/com.mycompany.mypackage folder to create upm branch with version tag.
-Therefore, you can import the package using [Unity Package Manager](https://docs.unity3d.com/2022.1/Documentation/Manual/upm-ui-giturl.html) with your GitHub repository url with version specified.
+Used to perform a subtree split on a specific folder in your current repo.  This is mainly used to create a branch within the repo on a specific folder for certain use cases.
 
 ## Usage
 
@@ -9,19 +8,18 @@ Use the action inside your workflow yaml file like this:
 
 ```yaml
 ...
-- name: Publish Unity package
-    uses: cdmvision/action-upm-publish@v1
+- name: Subtree Split
+    uses: Attack-Wagon/action-subtree-split@v1
     with: 
-        name: 'com.mycompany.mypackage'
-        upmBranch: 'upm'
+        prefix: 'Web/'
+        branch: 'web'
+        tag: 'v.1.0.0'
 ...
 
 ```
 
-See [real world example](https://github.com/ibrahimpenekli/GameToolkit-Localization/blob/develop/.github/workflows/deploy-upm.yml).
-
 ## Input Parameters
 
-* **name:** Name of the package from Packages/package.json
-* **upmBranch:** Name of the branch that the package will be published. (Default: 'upm')
-* **versionPostfix:** This will be added end of the version string. i.e. 1.5.0-postfix (Default: '')
+* **prefix:** Name of the folder to perform the subtree split on.
+* **branch:** Name of the branch that the subtree split will be sent to.
+* **tag:** OPTIONAL: Use thie parameter if you want to also add a tag to the subtree branch.
